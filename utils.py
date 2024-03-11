@@ -14,6 +14,9 @@ from filelock import FileLock
 import importlib_metadata
 import torch
 import torch.nn as nn
+import shutil
+from zipfile import ZipFile, is_zipfile
+import tarfile
 from torch import Tensor
 
 __version__ = "4.0.0"
