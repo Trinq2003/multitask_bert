@@ -21,6 +21,7 @@ from torch import Tensor
 
 __version__ = "4.0.0"
 _torch_version = importlib_metadata.version("torch")
+# _tf_version = importlib_metadata.version("tensorflow")
 
 hf_cache_home = os.path.expanduser(os.getenv("HF_HOME", os.path.join(os.getenv("XDG_CACHE_HOME", "~/.cache"), "huggingface")))
 default_cache_path = os.path.join(hf_cache_home, "transformers")
@@ -42,6 +43,9 @@ def is_torch_available():
 
 
 def is_tf_available():
+  return False
+
+def is_torch_tpu_available():
   return False
 
 

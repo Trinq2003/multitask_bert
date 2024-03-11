@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from base_bert import BertPreTrainedModel
+from model.base_bert import BertPreTrainedModel
 from utils import *
 
 

@@ -7,8 +7,8 @@ from torch import nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from bert import BertModel
-from optimizer import AdamW
+from model.bert import BertModel
+from optimizer.optimizer import AdamW
 from tqdm import tqdm
 
 from datasets import SentenceClassificationDataset, SentencePairDataset, \
@@ -16,7 +16,7 @@ from datasets import SentenceClassificationDataset, SentencePairDataset, \
 
 from evaluation import model_eval_sst, model_eval_multitask, test_model_multitask
 
-import proximateGD, bregmanDiv
+import model.proximateGD as proximateGD, optimizer.bregmanDiv as bregmanDiv
 
 
 TQDM_DISABLE=False

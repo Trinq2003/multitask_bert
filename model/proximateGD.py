@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 
-from bert import BertModel
+from model.bert import BertModel
 
 
 def model_prediction(model, batch, task_name='default'):

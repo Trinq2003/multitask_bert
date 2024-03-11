@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from optimizer import AdamW
+from optimizer.optimizer import AdamW
 
 seed = 0
 
