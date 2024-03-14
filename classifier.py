@@ -386,11 +386,10 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed)
-    #args.filepath = f'{args.option}-{args.epochs}-{args.lr}.pt'
 
     print('Training Sentiment Classifier on SST...')
     config = SimpleNamespace(
-        filepath='sst-classifier.pt',
+        filepath=f'./weights/sst-classifier-{args.option}-{args.epochs}-{args.lr}.pt',
         lr=args.lr,
         use_gpu=args.use_gpu,
         epochs=args.epochs,
@@ -417,7 +416,7 @@ if __name__ == "__main__":
 
     print('Training Sentiment Classifier on cfimdb...')
     config = SimpleNamespace(
-        filepath='cfimdb-classifier.pt',
+        filepath=f'./weights/cfimdb-classifier-{args.option}-{args.epochs}-{args.lr}.pt',
         lr=args.lr,
         use_gpu=args.use_gpu,
         epochs=args.epochs,
