@@ -14,6 +14,7 @@ from optimizer.optimizer import AdamW
 from tqdm import tqdm
 
 import model.proximateGD as proximateGD, optimizer.bregmanDiv as bregmanDiv
+from options import classifier_get_args as get_args
 
 TQDM_DISABLE = False
 
@@ -353,36 +354,6 @@ def test(args):
             for p, s  in zip(test_sent_ids,test_pred ):
                 f.write(f"{p} , {s} \n")
 
-
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", type=int, default=11711)
-    parser.add_argument("--epochs", type=int, default=10)
-    parser.add_argument("--option", type=str,
-                        help='pretrain: the BERT parameters are frozen; finetune: BERT parameters are updated',
-                        choices=('pretrain', 'finetune'), default="pretrain")
-    parser.add_argument("--use_gpu", action='store_true')
-    parser.add_argument("--dev_out", type=str, default="cfimdb-dev-output.txt")
-    parser.add_argument("--test_out", type=str, default="cfimdb-test-output.txt")
-
-    parser.add_argument("--batch_size", help='sst: 64, cfimdb: 8 can fit a 12GB GPU', type=int, default=8)
-    parser.add_argument("--hidden_dropout_prob", type=float, default=0.3)
-    parser.add_argument("--lr", type=float, help="learning rate, default lr for 'pretrain': 1e-3, 'finetune': 1e-5", default=1e-5)
-    parser.add_argument("--extension", type=str, default="default")
-
-    # adversarial regularization
-    parser.add_argument('--pgd_k', type=int, default=1)
-    parser.add_argument('--pgd_epsilon', type=float, default=1e-5)
-    parser.add_argument('--pgd_lambda', type=float, default=1)
-
-    # bergman momentum
-    parser.add_argument('--mbpp_beta', type=float, default=0.995)
-    parser.add_argument('--mbpp_mu', type=float, default=1)
-
-    args = parser.parse_args()
-    return args
-
-
 if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed)
@@ -395,9 +366,9 @@ if __name__ == "__main__":
         epochs=args.epochs,
         batch_size=args.batch_size,
         hidden_dropout_prob=args.hidden_dropout_prob,
-        train='data/ids-sst-train.csv',
-        dev='data/ids-sst-dev.csv',
-        test='data/ids-sst-test-student.csv',
+        train=args.sst_train,
+        dev=args.sst_dev,
+        test=args.sst_test,
         option=args.option,
         dev_out='predictions/'+args.option+'-sst-dev-out.csv',
         test_out='predictions/'+args.option+'-sst-test-out.csv',
