@@ -237,7 +237,7 @@ def save_model(model, optimizer, args, config, filepath):
 
 
 def train(args):
-    device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+    device = torch.device('mps') if args.use_gpu else torch.device('cpu')
     # Load data
     # Create the data and its corresponding datasets and dataloader
     train_data, num_labels = load_data(args.train, 'train')
@@ -323,7 +323,7 @@ def train(args):
 
 def test(args):
     with torch.no_grad():
-        device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+        device = torch.device('mps') if args.use_gpu else torch.device('cpu')
         saved = torch.load(args.filepath)
         config = saved['model_config']
         model = BertSentimentClassifier(config)
@@ -358,32 +358,32 @@ if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed)
 
-    print('Training Sentiment Classifier on SST...')
-    config = SimpleNamespace(
-        filepath=f'./weights/sst-classifier-{args.option}-{args.epochs}-{args.lr}.pt',
-        lr=args.lr,
-        use_gpu=args.use_gpu,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        hidden_dropout_prob=args.hidden_dropout_prob,
-        train=args.sst_train,
-        dev=args.sst_dev,
-        test=args.sst_test,
-        option=args.option,
-        dev_out='predictions/'+args.option+'-sst-dev-out.csv',
-        test_out='predictions/'+args.option+'-sst-test-out.csv',
-        extension=args.extension,
-        pgd_k=args.pgd_k,
-        pgd_epsilon=args.pgd_epsilon,
-        pgd_lambda=args.pgd_lambda,
-        mbpp_beta=args.mbpp_beta,
-        mbpp_mu=args.mbpp_mu
-    )
+    # print('Training Sentiment Classifier on SST...')
+    # config = SimpleNamespace(
+    #     filepath=f'./weights/sst-classifier-{args.option}-{args.epochs}-{args.lr}.pt',
+    #     lr=args.lr,
+    #     use_gpu=args.use_gpu,
+    #     epochs=args.epochs,
+    #     batch_size=args.batch_size,
+    #     hidden_dropout_prob=args.hidden_dropout_prob,
+    #     train=args.sst_train,
+    #     dev=args.sst_dev,
+    #     test=args.sst_test,
+    #     option=args.option,
+    #     dev_out='predictions/'+args.option+'-sst-dev-out.csv',
+    #     test_out='predictions/'+args.option+'-sst-test-out.csv',
+    #     extension=args.extension,
+    #     pgd_k=args.pgd_k,
+    #     pgd_epsilon=args.pgd_epsilon,
+    #     pgd_lambda=args.pgd_lambda,
+    #     mbpp_beta=args.mbpp_beta,
+    #     mbpp_mu=args.mbpp_mu
+    # )
 
-    train(config)
+    # train(config)
 
-    print('Evaluating on SST...')
-    test(config)
+    # print('Evaluating on SST...')
+    # test(config)
 
     print('Training Sentiment Classifier on cfimdb...')
     config = SimpleNamespace(
@@ -391,11 +391,11 @@ if __name__ == "__main__":
         lr=args.lr,
         use_gpu=args.use_gpu,
         epochs=args.epochs,
-        batch_size=8,
+        batch_size=args.batch_size,
         hidden_dropout_prob=args.hidden_dropout_prob,
-        train='data/ids-cfimdb-train.csv',
-        dev='data/ids-cfimdb-dev.csv',
-        test='data/ids-cfimdb-test-student.csv',
+        train=args.cfimdb_train,
+        dev=args.cfimdb_dev,
+        test=args.cfimdb_test,
         option=args.option,
         dev_out ='predictions/'+args.option+'-cfimdb-dev-out.csv',
         test_out = 'predictions/'+args.option+'-cfimdb-test-out.csv',

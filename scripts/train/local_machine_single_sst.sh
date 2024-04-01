@@ -6,3 +6,4 @@ python classifier.py \
     --option pretrain \
     --lr 1e-3 \
     --use_gpu
+

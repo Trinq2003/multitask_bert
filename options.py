@@ -21,6 +21,10 @@ def classifier_get_args():
     parser.add_argument('--sst_dev', default='data/ids-sst-dev.csv')
     parser.add_argument('--sst_test', default='data/ids-sst-test-student.csv')
 
+    parser.add_argument('--cfimdb_train', default='data/ids-cfimdb-train.csv')
+    parser.add_argument('--cfimdb_dev', default='data/ids-cfimdb-dev.csv')
+    parser.add_argument('--cfimdb_test', default='data/ids-cfimdb-test-student.csv')
+
     # adversarial regularization
     parser.add_argument('--pgd_k', type=int, default=1)
     parser.add_argument('--pgd_epsilon', type=float, default=1e-5)
