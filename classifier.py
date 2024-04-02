@@ -358,56 +358,58 @@ if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed)
 
-    # print('Training Sentiment Classifier on SST...')
-    # config = SimpleNamespace(
-    #     filepath=f'./weights/sst-classifier-{args.option}-{args.epochs}-{args.lr}.pt',
-    #     lr=args.lr,
-    #     use_gpu=args.use_gpu,
-    #     epochs=args.epochs,
-    #     batch_size=args.batch_size,
-    #     hidden_dropout_prob=args.hidden_dropout_prob,
-    #     train=args.sst_train,
-    #     dev=args.sst_dev,
-    #     test=args.sst_test,
-    #     option=args.option,
-    #     dev_out='predictions/'+args.option+'-sst-dev-out.csv',
-    #     test_out='predictions/'+args.option+'-sst-test-out.csv',
-    #     extension=args.extension,
-    #     pgd_k=args.pgd_k,
-    #     pgd_epsilon=args.pgd_epsilon,
-    #     pgd_lambda=args.pgd_lambda,
-    #     mbpp_beta=args.mbpp_beta,
-    #     mbpp_mu=args.mbpp_mu
-    # )
+    if args.sst_train and args.sst_dev and args.sst_test:
+        print('Training Sentiment Classifier on SST...')
+        config = SimpleNamespace(
+            filepath=f'./weights/sst-classifier-{args.option}-{args.epochs}-{args.lr}.pt',
+            lr=args.lr,
+            use_gpu=args.use_gpu,
+            epochs=args.epochs,
+            batch_size=args.batch_size,
+            hidden_dropout_prob=args.hidden_dropout_prob,
+            train=args.sst_train,
+            dev=args.sst_dev,
+            test=args.sst_test,
+            option=args.option,
+            dev_out='predictions/'+args.option+'-sst-dev-out.csv',
+            test_out='predictions/'+args.option+'-sst-test-out.csv',
+            extension=args.extension,
+            pgd_k=args.pgd_k,
+            pgd_epsilon=args.pgd_epsilon,
+            pgd_lambda=args.pgd_lambda,
+            mbpp_beta=args.mbpp_beta,
+            mbpp_mu=args.mbpp_mu
+        )
 
-    # train(config)
+        train(config)
 
-    # print('Evaluating on SST...')
-    # test(config)
+        print('Evaluating on SST...')
+        test(config)
+    
+    elif args.cfimdb_train and args.cfimdb_dev and args.cfimdb_test:
+        print('Training Sentiment Classifier on cfimdb...')
+        config = SimpleNamespace(
+            filepath=f'./weights/cfimdb-classifier-{args.option}-{args.epochs}-{args.lr}.pt',
+            lr=args.lr,
+            use_gpu=args.use_gpu,
+            epochs=args.epochs,
+            batch_size=args.batch_size,
+            hidden_dropout_prob=args.hidden_dropout_prob,
+            train=args.cfimdb_train,
+            dev=args.cfimdb_dev,
+            test=args.cfimdb_test,
+            option=args.option,
+            dev_out ='predictions/'+args.option+'-cfimdb-dev-out.csv',
+            test_out = 'predictions/'+args.option+'-cfimdb-test-out.csv',
+            extension=args.extension,
+            pgd_k=args.pgd_k,
+            pgd_epsilon=args.pgd_epsilon,
+            pgd_lambda=args.pgd_lambda,
+            mbpp_beta=args.mbpp_beta,
+            mbpp_mu=args.mbpp_mu
+        )
 
-    print('Training Sentiment Classifier on cfimdb...')
-    config = SimpleNamespace(
-        filepath=f'./weights/cfimdb-classifier-{args.option}-{args.epochs}-{args.lr}.pt',
-        lr=args.lr,
-        use_gpu=args.use_gpu,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        hidden_dropout_prob=args.hidden_dropout_prob,
-        train=args.cfimdb_train,
-        dev=args.cfimdb_dev,
-        test=args.cfimdb_test,
-        option=args.option,
-        dev_out ='predictions/'+args.option+'-cfimdb-dev-out.csv',
-        test_out = 'predictions/'+args.option+'-cfimdb-test-out.csv',
-        extension=args.extension,
-        pgd_k=args.pgd_k,
-        pgd_epsilon=args.pgd_epsilon,
-        pgd_lambda=args.pgd_lambda,
-        mbpp_beta=args.mbpp_beta,
-        mbpp_mu=args.mbpp_mu
-    )
+        train(config)
 
-    train(config)
-
-    print('Evaluating on cfimdb...')
-    test(config)
+        print('Evaluating on cfimdb...')
+        test(config)
