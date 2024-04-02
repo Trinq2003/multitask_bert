@@ -17,13 +17,13 @@ def classifier_get_args():
     parser.add_argument("--extension", type=str, default="default")
 
     # datapath
-    parser.add_argument('--sst_train', default='data/ids-sst-train.csv')
-    parser.add_argument('--sst_dev', default='data/ids-sst-dev.csv')
-    parser.add_argument('--sst_test', default='data/ids-sst-test-student.csv')
+    parser.add_argument('--sst_train')
+    parser.add_argument('--sst_dev')
+    parser.add_argument('--sst_test')
 
-    parser.add_argument('--cfimdb_train', default='data/ids-cfimdb-train.csv')
-    parser.add_argument('--cfimdb_dev', default='data/ids-cfimdb-dev.csv')
-    parser.add_argument('--cfimdb_test', default='data/ids-cfimdb-test-student.csv')
+    parser.add_argument('--cfimdb_train')
+    parser.add_argument('--cfimdb_dev')
+    parser.add_argument('--cfimdb_test')
 
     # adversarial regularization
     parser.add_argument('--pgd_k', type=int, default=1)
