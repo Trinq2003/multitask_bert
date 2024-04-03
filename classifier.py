@@ -237,7 +237,7 @@ def save_model(model, optimizer, args, config, filepath):
 
 
 def train(args):
-    device = torch.device('mps') if args.use_gpu else torch.device('cpu')
+    device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
     # Load data
     # Create the data and its corresponding datasets and dataloader
     train_data, num_labels = load_data(args.train, 'train')
@@ -323,7 +323,7 @@ def train(args):
 
 def test(args):
     with torch.no_grad():
-        device = torch.device('mps') if args.use_gpu else torch.device('cpu')
+        device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
         saved = torch.load(args.filepath)
         config = saved['model_config']
         model = BertSentimentClassifier(config)
