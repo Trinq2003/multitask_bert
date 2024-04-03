@@ -61,7 +61,7 @@ def model_eval_sst(dataloader, model, device):
 def model_eval_multitask(sentiment_dataloader,
                          paraphrase_dataloader,
                          sts_dataloader,
-                         model, device, print_bool=True):
+                         model, device, args, print_bool=True):
     model.eval()  # switch to eval model, will turn off randomness like dropout
 
     with torch.no_grad():
@@ -82,8 +82,11 @@ def model_eval_multitask(sentiment_dataloader,
             b_ids2 = b_ids2.to(device)
             b_mask2 = b_mask2.to(device)
 
-            #logits = model.predict_paraphrase(b_ids1, b_mask1, b_ids2, b_mask2)
-            logits = model.predict_para(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+            if args.rlayer:
+                logits = model.predict_para(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+            else:
+                logits = model.predict_paraphrase(b_ids1, b_mask1, b_ids2, b_mask2)
+            
             y_hat = logits.sigmoid().round().flatten().cpu().numpy()
             b_labels = b_labels.flatten().cpu().numpy()
 
@@ -111,8 +114,11 @@ def model_eval_multitask(sentiment_dataloader,
             b_ids2 = b_ids2.to(device)
             b_mask2 = b_mask2.to(device)
 
-            #logits = model.predict_similarity(b_ids1, b_mask1, b_ids2, b_mask2)
-            logits = model.predict_sim(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+            if args.rlayer:
+                logits = model.predict_sim(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+            else:
+                logits = model.predict_similarity(b_ids1, b_mask1, b_ids2, b_mask2)
+            
             y_hat = logits.flatten().cpu().numpy()
             b_labels = (b_labels/5.0).flatten().cpu().numpy()
 
@@ -157,7 +163,7 @@ def model_eval_multitask(sentiment_dataloader,
 def model_eval_test_multitask(sentiment_dataloader,
                          paraphrase_dataloader,
                          sts_dataloader,
-                         model, device):
+                         model, device, args):
     model.eval()  # switch to eval model, will turn off randomness like dropout
 
     with torch.no_grad():
@@ -177,8 +183,11 @@ def model_eval_test_multitask(sentiment_dataloader,
             b_ids2 = b_ids2.to(device)
             b_mask2 = b_mask2.to(device)
 
-            #logits = model.predict_paraphrase(b_ids1, b_mask1, b_ids2, b_mask2)
-            logits = model.predict_para(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+            
+            if args.rlayer:
+                logits = model.predict_para(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+            else:
+                logits = model.predict_paraphrase(b_ids1, b_mask1, b_ids2, b_mask2)
             y_hat = logits.sigmoid().round().flatten().cpu().numpy()
 
             para_y_pred.extend(y_hat)
@@ -201,9 +210,12 @@ def model_eval_test_multitask(sentiment_dataloader,
             b_mask1 = b_mask1.to(device)
             b_ids2 = b_ids2.to(device)
             b_mask2 = b_mask2.to(device)
+            
+            if args.rlayer:
+                logits = model.predict_sim(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+            else:
+                logits = model.predict_similarity(b_ids1, b_mask1, b_ids2, b_mask2)
 
-            #logits = model.predict_similarity(b_ids1, b_mask1, b_ids2, b_mask2)
-            logits = model.predict_sim(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
             y_hat = logits.flatten().cpu().numpy()
 
             sts_y_pred.extend(y_hat)
@@ -266,13 +278,13 @@ def test_model_multitask(args, model, device):
             dev_sentiment_accuracy,dev_sst_y_pred, dev_sst_sent_ids, dev_sts_corr, \
             dev_sts_y_pred, dev_sts_sent_ids = model_eval_multitask(sst_dev_dataloader,
                                                                     para_dev_dataloader,
-                                                                    sts_dev_dataloader, model, device)
+                                                                    sts_dev_dataloader, model, device, args)
 
         test_para_y_pred, test_para_sent_ids, test_sst_y_pred, \
             test_sst_sent_ids, test_sts_y_pred, test_sts_sent_ids = \
                 model_eval_test_multitask(sst_test_dataloader,
                                           para_test_dataloader,
-                                          sts_test_dataloader, model, device)
+                                          sts_test_dataloader, model, device, args)
 
         with open(args.sst_dev_out, "w+") as f:
             print(f"dev sentiment acc :: {dev_sentiment_accuracy :.3f}")
