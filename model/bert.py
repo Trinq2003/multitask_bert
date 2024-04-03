@@ -158,6 +158,10 @@ class BertModel(BertPreTrainedModel):
     self.init_weights()
 
   def embed(self, input_ids):
+    """
+    input_ids: [batch_size, seq_len], seq_len is the max length of the batch
+    attention_mask: same size as input_ids, 1 represents non-padding tokens, 0 represents padding tokens
+    """
     input_shape = input_ids.size()
     seq_length = input_shape[1]
 
@@ -210,10 +214,10 @@ class BertModel(BertPreTrainedModel):
     embedding_output = self.embed(input_ids=input_ids)
 
     # feed to a transformer (a stack of BertLayers)
-    sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
+    sequence_output = self.encode(embedding_output, attention_mask=attention_mask) #size: [batch_size, seq_len, hidden_size]
 
     # get cls token hidden state
-    first_tk = sequence_output[:, 0]
+    first_tk = sequence_output[:, 0] #size: [batch_size, 0,  hidden_size] (the first token CLS of each sequence)
     first_tk = self.pooler_dense(first_tk)
     first_tk = self.pooler_af(first_tk)
 

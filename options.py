@@ -34,6 +34,9 @@ def classifier_get_args():
     parser.add_argument('--mbpp_beta', type=float, default=0.995)
     parser.add_argument('--mbpp_mu', type=float, default=1)
 
+    # adding the relational layer
+    parser.add_argument('--rlayer', action='store_true')
+
     args = parser.parse_args()
     return args
 
@@ -53,7 +56,7 @@ def multitask_classifier_get_args():
     parser.add_argument("--sts_test", type=str, default="data/sts-test-student.csv")
 
     parser.add_argument("--seed", type=int, default=11711)
-    parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--option", type=str,
                         help='pretrain: the BERT parameters are frozen; finetune: BERT parameters are updated',
                         choices=('pretrain', 'finetune'), default="pretrain")

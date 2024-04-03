@@ -183,7 +183,7 @@ def save_model(model, optimizer, args, config, filepath):
 
 ## Currently only trains on sst dataset
 def train_multitask(args):
-    device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+    device = torch.device('mps') if args.use_gpu else torch.device('cpu')
     
     # Load data
     # Create the data and its corresponding datasets and dataloader
@@ -194,7 +194,7 @@ def train_multitask(args):
     if args.extension in ['rrobin', 'rrobin-smart']:
         # Args batch size is largest batch size; choose num_iterations as max len data divided by batch size
         # Update other datasets' batch size based on len data and num iterations
-        if args.batch_type == "full":
+        if args.batch_type == "full": #interleaved round-robin batch
             num_iterations = min(len(sts_train_data), math.floor(len(para_train_data)/args.batch_size))
             batch_size_sst = math.floor(len(sst_train_data)/num_iterations)
             batch_size_sts = math.floor(len(sts_train_data)/num_iterations)
@@ -206,7 +206,7 @@ def train_multitask(args):
             
             sts_train_data = SentencePairDataset(sts_train_data, args, isRegression=True)
             sts_train_dataloader = DataLoader(sts_train_data, shuffle=True, batch_size=batch_size_sts, collate_fn=sts_train_data.collate_fn)
-        else:
+        else: #equally-weighted batch
             num_iterations = math.floor(len(sts_train_data) / args.batch_size)
             num_samples = num_iterations * args.batch_size
             
@@ -314,8 +314,12 @@ def train_multitask(args):
                 b_ids1, b_mask1, b_ids2, b_mask2, b_labels = b_ids1.to(device), b_mask1.to(device), b_ids2.to(device), b_mask2.to(device), b_labels.to(device)
 
                 optimizer.zero_grad()
-                #logits = model.predict_paraphrase(b_ids1, b_mask1, b_ids2, b_mask2)
-                logits = model.predict_para(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+                
+                if args.rlayer:
+                    logits = model.predict_para(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+                else:
+                    logits = model.predict_paraphrase(b_ids1, b_mask1, b_ids2, b_mask2)
+
                 loss = F.binary_cross_entropy(logits.squeeze().sigmoid(), b_labels.view(-1).type(torch.float32), reduction='sum') / args.batch_size
 
                 loss.backward(retain_graph=True)  # added retain_graph=True
@@ -347,8 +351,10 @@ def train_multitask(args):
                 b_ids1, b_mask1, b_ids2, b_mask2, b_labels = b_ids1.to(device), b_mask1.to(device), b_ids2.to(device), b_mask2.to(device), b_labels.to(device)
 
                 optimizer.zero_grad()
-                #logits = model.predict_similarity(b_ids1, b_mask1, b_ids2, b_mask2)
-                logits = model.predict_sim(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+                if args.rlayer:
+                    logits = model.predict_sim(model.sent_pair_linear(b_ids1, b_mask1, b_ids2, b_mask2, device))
+                else:
+                    logits = model.predict_similarity(b_ids1, b_mask1, b_ids2, b_mask2)
                 b_labels_scaled = (b_labels/5.0).type(torch.float32)
                 loss = F.mse_loss(logits.flatten(), b_labels_scaled.view(-1))
 
@@ -465,7 +471,7 @@ def train_multitask(args):
 
 def test_model(args):
     with torch.no_grad():
-        device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+        device = torch.device('mps') if args.use_gpu else torch.device('cpu')
         saved = torch.load(args.filepath)
         config = saved['model_config']
 
