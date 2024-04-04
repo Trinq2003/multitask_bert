@@ -183,7 +183,7 @@ def save_model(model, optimizer, args, config, filepath):
 
 ## Currently only trains on sst dataset
 def train_multitask(args):
-    device = torch.device('mps') if args.use_gpu else torch.device('cpu')
+    device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
     
     # Load data
     # Create the data and its corresponding datasets and dataloader
@@ -475,7 +475,7 @@ def train_multitask(args):
 
 def test_model(args):
     with torch.no_grad():
-        device = torch.device('mps') if args.use_gpu else torch.device('cpu')
+        device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
         saved = torch.load(args.filepath)
         config = saved['model_config']
 
