@@ -78,7 +78,7 @@ def multitask_classifier_get_args():
     parser.add_argument("--extension", type=str, default="default")
 
     # adding the relational layer
-    parser.add_argument('--rlayer', action='store_true')
+    parser.add_argument('--rlayer', type=bool, default=False)
 
     # adversarial regularization
     parser.add_argument('--pgd_k', type=int, default=1)
