@@ -183,7 +183,7 @@ def save_model(model, optimizer, args, config, filepath):
 
 ## Currently only trains on sst dataset
 def train_multitask(args):
-    device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+    device = torch.device('cuda') if args.use_cuda else torch.device('mps')
     
     # Load data
     # Create the data and its corresponding datasets and dataloader
@@ -207,8 +207,9 @@ def train_multitask(args):
             sts_train_data = SentencePairDataset(sts_train_data, args, isRegression=True)
             sts_train_dataloader = DataLoader(sts_train_data, shuffle=True, batch_size=batch_size_sts, collate_fn=sts_train_data.collate_fn)
         else: #equally-weighted batch
-            num_iterations = math.floor(len(sts_train_data) / args.batch_size)
+            # num_iterations = math.floor(len(sts_train_data) / args.batch_size)
             # num_samples = num_iterations * args.batch_size
+            num_iterations = 4
             num_samples = 10
             
             sst_train_data = SentenceClassificationDataset(random.sample(sst_train_data, num_samples), args)
@@ -352,7 +353,7 @@ def train_multitask(args):
                 ### similarity ----------------------------------------------
                 batch = next(sts_iterator)
                 (b_ids1, b_mask1, b_ids2, b_mask2, b_labels) = (batch['token_ids_1'], batch['attention_mask_1'], batch['token_ids_2'], batch['attention_mask_2'], batch['labels'])
-                b_ids1, b_mask1, b_ids2, b_mask2, b_labels = b_ids1.to(device), b_mask1.to(device), b_ids2.to(device), b_mask2.to(device), b_labels.to(device)
+                b_ids1, b_mask1, b_ids2, b_mask2, b_labels = b_ids1.to(torch.float32).to(device), b_mask1.to(torch.float32).to(device), b_ids2.to(torch.float32).to(device), b_mask2.to(torch.float32).to(device), b_labels.to(torch.float32).to(device)
 
                 optimizer.zero_grad()
                 if args.rlayer:
@@ -475,7 +476,7 @@ def train_multitask(args):
 
 def test_model(args):
     with torch.no_grad():
-        device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+        device = torch.device('mps') if args.use_gpu else torch.device('cpu')
         saved = torch.load(args.filepath)
         config = saved['model_config']
 
