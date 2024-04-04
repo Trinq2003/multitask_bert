@@ -208,9 +208,8 @@ def train_multitask(args):
             sts_train_dataloader = DataLoader(sts_train_data, shuffle=True, batch_size=batch_size_sts, collate_fn=sts_train_data.collate_fn)
         else: #equally-weighted batch
             # num_iterations = math.floor(len(sts_train_data) / args.batch_size)
-            # num_samples = num_iterations * args.batch_size
             num_iterations = 4
-            num_samples = 10
+            num_samples = num_iterations * args.batch_size
             
             sst_train_data = SentenceClassificationDataset(random.sample(sst_train_data, num_samples), args)
             sst_train_dataloader = DataLoader(sst_train_data, shuffle=True, batch_size=args.batch_size, collate_fn=sst_train_data.collate_fn)
