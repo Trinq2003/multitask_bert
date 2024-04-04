@@ -183,7 +183,7 @@ def save_model(model, optimizer, args, config, filepath):
 
 ## Currently only trains on sst dataset
 def train_multitask(args):
-    device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+    device = torch.device('mps') if args.use_gpu else torch.device('cpu')
     
     # Load data
     # Create the data and its corresponding datasets and dataloader
@@ -208,7 +208,8 @@ def train_multitask(args):
             sts_train_dataloader = DataLoader(sts_train_data, shuffle=True, batch_size=batch_size_sts, collate_fn=sts_train_data.collate_fn)
         else: #equally-weighted batch
             num_iterations = math.floor(len(sts_train_data) / args.batch_size)
-            num_samples = num_iterations * args.batch_size
+            # num_samples = num_iterations * args.batch_size
+            num_samples = 10
             
             sst_train_data = SentenceClassificationDataset(random.sample(sst_train_data, num_samples), args)
             sst_train_dataloader = DataLoader(sst_train_data, shuffle=True, batch_size=args.batch_size, collate_fn=sst_train_data.collate_fn)
@@ -218,15 +219,18 @@ def train_multitask(args):
             sts_train_data = SentencePairDataset(random.sample(sts_train_data, num_samples), args, isRegression=True)
             sts_train_dataloader = DataLoader(sts_train_data, shuffle=True, batch_size=args.batch_size, collate_fn=sts_train_data.collate_fn)
 
-        sst_dev_data = SentenceClassificationDataset(sst_dev_data, args)
+        # sst_dev_data = SentenceClassificationDataset(sst_dev_data, args)
+        sst_dev_data = SentenceClassificationDataset(random.sample(sst_dev_data, num_samples), args)
         sst_dev_dataloader = DataLoader(sst_dev_data, shuffle=False, batch_size=args.batch_size, collate_fn=sst_dev_data.collate_fn)
 
         para_train_dataloader = DataLoader(para_train_data, shuffle=True, batch_size=args.batch_size, collate_fn=para_train_data.collate_fn)
 
-        para_dev_data = SentencePairDataset(para_dev_data, args)
+        # para_dev_data = SentencePairDataset(para_dev_data, args)
+        para_dev_data = SentencePairDataset(random.sample(para_dev_data, num_samples), args)
         para_dev_dataloader = DataLoader(para_dev_data, shuffle=False, batch_size=args.batch_size, collate_fn=para_dev_data.collate_fn)
 
-        sts_dev_data = SentencePairDataset(sts_dev_data, args, isRegression=True)
+        # sts_dev_data = SentencePairDataset(sts_dev_data, args, isRegression=True)
+        sts_dev_data = SentencePairDataset(random.sample(sts_dev_data, num_samples), args)
         sts_dev_dataloader = DataLoader(sts_dev_data, shuffle=False, batch_size=args.batch_size, collate_fn=sts_dev_data.collate_fn)
 
     else:  # default train only on sentiment dataset
@@ -471,7 +475,7 @@ def train_multitask(args):
 
 def test_model(args):
     with torch.no_grad():
-        device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+        device = torch.device('mps') if args.use_gpu else torch.device('cpu')
         saved = torch.load(args.filepath)
         config = saved['model_config']
 

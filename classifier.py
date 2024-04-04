@@ -243,6 +243,12 @@ def train(args):
     train_data, num_labels = load_data(args.train, 'train')
     dev_data = load_data(args.dev, 'valid')
 
+    # for testing running
+    # num_sample = 10
+
+    # train_dataset = SentimentDataset(random.sample(train_data, num_sample), args)
+    # dev_dataset = SentimentDataset(random.sample(dev_data, num_sample), args)
+
     train_dataset = SentimentDataset(train_data, args)
     dev_dataset = SentimentDataset(dev_data, args)
 
