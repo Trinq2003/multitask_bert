@@ -25,6 +25,8 @@ from datasets import load_multitask_data, load_multitask_test_data, \
     SentenceClassificationDataset, SentenceClassificationTestDataset, \
     SentencePairDataset, SentencePairTestDataset
 
+from options import multitask_classifier_get_args as get_args
+
 
 TQDM_DISABLE = False
 
@@ -62,6 +64,7 @@ def model_eval_multitask(sentiment_dataloader,
                          paraphrase_dataloader,
                          sts_dataloader,
                          model, device, args, print_bool=True):
+    args = get_args()
     model.eval()  # switch to eval model, will turn off randomness like dropout
 
     with torch.no_grad():
@@ -164,6 +167,7 @@ def model_eval_test_multitask(sentiment_dataloader,
                          paraphrase_dataloader,
                          sts_dataloader,
                          model, device, args):
+    args = get_args()
     model.eval()  # switch to eval model, will turn off randomness like dropout
 
     with torch.no_grad():
