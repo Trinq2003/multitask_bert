@@ -1,5 +1,9 @@
 from argparse import ArgumentParser
 
+# Wandb params
+WANDB_API_KEY = "09d9c01b499874346601e6ec425a8c58a6f82000"
+
+# Arguments parser
 def classifier_get_args():
     parser = ArgumentParser(description='Arguments for the single-task classifier training')
     parser.add_argument("--seed", type=int, default=11711)

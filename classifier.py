@@ -2,6 +2,7 @@ import time, random, numpy as np, argparse, sys, re, os
 from types import SimpleNamespace
 import csv
 
+import wandb
 import torch
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
@@ -15,8 +16,10 @@ from tqdm import tqdm
 
 import model.proximateGD as proximateGD, optimizer.bregmanDiv as bregmanDiv
 from options import classifier_get_args as get_args
+from options import WANDB_API_KEY
 
 TQDM_DISABLE = False
+
 
 
 # fix the random seed
@@ -237,6 +240,10 @@ def save_model(model, optimizer, args, config, filepath):
 
 
 def train(args):
+    wandb.login(key=WANDB_API_KEY)
+    wandb.init(project="sentiment-analysis-single-classifier")
+    wandb.config.update(args)
+
     device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
     # Load data
     # Create the data and its corresponding datasets and dataloader
@@ -268,6 +275,7 @@ def train(args):
     best_dev_acc = 0
     optimizer = AdamW(model.parameters(), lr=lr)
 
+    wandb.watch(model, log="all")
     # Run for the specified number of epochs
     for epoch in range(args.epochs):
         model.train()
@@ -306,6 +314,8 @@ def train(args):
             else:  # default implementation
                 optimizer.step()
 
+            wandb.log({"train_loss": loss.item(), "epoch": epoch})
+
             train_loss += loss.item()  # TODO: how is train loss updated?
             num_batches += 1
 
@@ -314,12 +324,21 @@ def train(args):
         train_acc, train_f1, *_  = model_eval(train_dataloader, model, device)
         dev_acc, dev_f1, *_ = model_eval(dev_dataloader, model, device)
 
+        wandb.log({
+            "epoch": epoch,
+            "train_loss": train_loss,
+            "train_acc": train_acc,
+            "train_f1": train_f1,
+            "dev_acc": dev_acc,
+            "dev_f1": dev_f1
+        })
+
         if dev_acc > best_dev_acc:
             best_dev_acc = dev_acc
             save_model(model, optimizer, args, config, args.filepath)
-
         print(f"Epoch {epoch}: train loss :: {train_loss :.3f}, train acc :: {train_acc :.3f}, dev acc :: {dev_acc :.3f}")
-
+    
+    wandb.finish()
 
 def test(args):
     with torch.no_grad():

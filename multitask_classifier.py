@@ -2,6 +2,7 @@ import time, random, numpy as np, argparse, sys, re, os
 from types import SimpleNamespace
 import math, random
 
+import wandb
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -18,6 +19,7 @@ from evaluation import model_eval_sst, model_eval_multitask, test_model_multitas
 
 import model.proximateGD as proximateGD, optimizer.bregmanDiv as bregmanDiv
 from options import multitask_classifier_get_args as get_args
+from options import WANDB_API_KEY
 
 
 TQDM_DISABLE=False
@@ -183,6 +185,10 @@ def save_model(model, optimizer, args, config, filepath):
 
 ## Currently only trains on sst dataset
 def train_multitask(args):
+    wandb.login(key=WANDB_API_KEY)
+    wandb.init(project="sentiment-analysis-multi-classifiers")
+    wandb.config.update(args)
+
     device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
     
     # Load data
@@ -254,6 +260,8 @@ def train_multitask(args):
     model = MultitaskBERT(config)
     model = model.to(device)
 
+    wandb.watch(model, log="all")
+
     if args.extension in ['smart', 'rrobin-smart']:
         pgd = proximateGD.AdversarialReg(model, args.pgd_epsilon, args.pgd_lambda)
         mbpp = bregmanDiv.MBPP(model, args.mbpp_beta, args.mbpp_mu)
@@ -264,7 +272,6 @@ def train_multitask(args):
 
     # expand finetuning to include all multitask datasets
     if args.extension in ['rrobin', 'rrobin-smart']:
-
         # run for the specified number of epochs
         for epoch in range(args.epochs):
             model.train()
@@ -305,7 +312,11 @@ def train_multitask(args):
                 else:  # default implementation
                     #nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0, norm_type=2)
                     optimizer.step()
-
+                wandb.log({"epoch": epoch,
+                            "train_loss_sst": train_loss_sst,
+                            "train_loss_para": train_loss_para,
+                            "train_loss_sts": train_loss_sts,
+                           })
                 train_loss_sst += loss.item()
 
                 ### paraphrase ----------------------------------------------
@@ -407,7 +418,18 @@ def train_multitask(args):
             print(f"Epoch {epoch}: sentiment -->> train loss :: {train_loss_sst :.3f}, train acc :: {train_acc_sst :.3f}, dev acc :: {dev_acc_sst :.3f}") 
             print(f"Epoch {epoch}: paraphrase -->> train loss :: {train_loss_para :.3f}, train acc :: {train_acc_para :.3f}, dev acc :: {dev_acc_para :.3f}") 
             print(f"Epoch {epoch}: similarity -->> train loss :: {train_loss_sts :.3f}, train acc :: {train_acc_sts :.3f}, dev acc :: {dev_acc_sts :.3f}") 
-
+            wandb.log({
+                "epoch": epoch,
+                "train_loss_sst_epoch": train_loss_sst / num_batches,
+                "train_loss_para_epoch": train_loss_para / num_batches,
+                "train_loss_sts_epoch": train_loss_sts / num_batches,
+                "train_acc_sst": train_acc_sst,
+                "dev_acc_sst": dev_acc_sst,
+                "train_acc_para": train_acc_para,
+                "dev_acc_para": dev_acc_para,
+                "train_acc_sts": train_acc_sts,
+                "dev_acc_sts": dev_acc_sts,
+            })
             # del loss; del adv_loss; del breg_div; del logits
 
     else:  # default train only on sentiment dataset
@@ -442,11 +464,15 @@ def train_multitask(args):
 
                     nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0, norm_type=2)
                     optimizer.step()
+                    wandb.log({
+                        "epoch": epoch,
+                        "adv_loss": adv_loss,
+                        "breg_div": breg_div,
+                    })
                     mbpp.apply_momentum(model.named_parameters())
 
                 else:  # default implementation
                     optimizer.step()
-
                 train_loss += loss.item()
                 num_batches += 1
 
@@ -459,9 +485,16 @@ def train_multitask(args):
                 best_dev_acc = dev_acc
                 save_model(model, optimizer, args, config, args.filepath)
             
+            wandb.log({
+                "epoch": epoch,
+                "train_loss_epoch": train_loss / num_batches,
+                "train_acc": train_acc,
+                "dev_acc": dev_acc
+            })
             print(f"Epoch {epoch}: train loss :: {train_loss :.3f}, train acc :: {train_acc :.3f}, dev acc :: {dev_acc :.3f}") 
 
             # del loss; del logits
+    wandb.finish()
 
 def test_model(args):
     with torch.no_grad():

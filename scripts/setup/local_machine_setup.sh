@@ -12,4 +12,5 @@ pip install scikit-learn==0.24.1
 pip install tokenizers==0.10.1
 pip install explainaboard_client==0.0.7
 pip install numpy
+pip install wandb
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
