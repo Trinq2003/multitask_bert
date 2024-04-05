@@ -3,4 +3,4 @@ python multitask_classifier.py \
 --use_gpu \
 --batch_size 8 \
 --extension 'rrobin' \
---batch_type 'small' 
+--batch_type 'small'
