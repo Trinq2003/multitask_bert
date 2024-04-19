@@ -262,7 +262,7 @@ def load_multitask_data(sentiment_filename,paraphrase_filename,similarity_filena
                 label = int(record['sentiment'].strip())
                 if label not in num_labels:
                     num_labels[label] = len(num_labels)
-                sentiment_data.append((sent, label,sent_id))
+                sentiment_data.append((sent, label, sent_id))
 
     print(f"Loaded {len(sentiment_data)} {split} examples from {sentiment_filename}")
 
