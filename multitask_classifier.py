@@ -1,6 +1,7 @@
 import time, random, numpy as np, argparse, sys, re, os
 from types import SimpleNamespace
 import math, random
+import wandb
 
 import torch
 from torch import nn
@@ -18,6 +19,7 @@ from evaluation import model_eval_sst, model_eval_multitask, test_model_multitas
 
 import model.proximateGD as proximateGD, optimizer.bregmanDiv as bregmanDiv
 from options import multitask_classifier_get_args as get_args
+from options import WANDB_API_KEY
 
 
 TQDM_DISABLE=False
@@ -183,6 +185,9 @@ def save_model(model, optimizer, args, config, filepath):
 
 ## Currently only trains on sst dataset
 def train_multitask(args):
+    wandb.login(key=WANDB_API_KEY)
+    wandb.init(project="sentiment-analysis-multi-classifiers")
+    wandb.config.update(args)
     device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
     
     # Load data
@@ -253,6 +258,8 @@ def train_multitask(args):
 
     model = MultitaskBERT(config)
     model = model.to(device)
+
+    wandb.watch(model, log='all')
 
     if args.extension in ['smart', 'rrobin-smart']:
         pgd = proximateGD.AdversarialReg(model, args.pgd_epsilon, args.pgd_lambda)
@@ -413,6 +420,18 @@ def train_multitask(args):
             print(f"Epoch {epoch}: sentiment -->> train loss :: {train_loss_sst :.3f}, train acc :: {train_acc_sst :.3f}, dev acc :: {dev_acc_sst :.3f}") 
             print(f"Epoch {epoch}: paraphrase -->> train loss :: {train_loss_para :.3f}, train acc :: {train_acc_para :.3f}, dev acc :: {dev_acc_para :.3f}") 
             print(f"Epoch {epoch}: similarity -->> train loss :: {train_loss_sts :.3f}, train acc :: {train_acc_sts :.3f}, dev acc :: {dev_acc_sts :.3f}") 
+            wandb.log({
+                "epoch": epoch,
+                "train_loss_sst": train_loss_sst,
+                "train_loss_para": train_loss_para,
+                "train_loss_sts": train_loss_sts,
+                "train_acc_sst": train_acc_sst,
+                "dev_acc_sst": dev_acc_sst,
+                "train_acc_para": train_acc_para,
+                "dev_acc_para": dev_acc_para,
+                "train_acc_sts": train_acc_sts,
+                "dev_acc_sts": dev_acc_sts,
+            })
 
             # del loss; del adv_loss; del breg_div; del logits
 
@@ -467,7 +486,15 @@ def train_multitask(args):
             
             print(f"Epoch {epoch}: train loss :: {train_loss :.3f}, train acc :: {train_acc :.3f}, dev acc :: {dev_acc :.3f}") 
 
+            wandb.log({
+                "epoch": epoch,
+                "train_loss": train_loss,
+                "train_acc": train_acc,
+                "dev_acc": dev_acc
+            })
+
             # del loss; del logits
+    wandb.finish()
 
 def test_model(args):
     with torch.no_grad():
